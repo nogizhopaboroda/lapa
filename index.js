@@ -1,67 +1,22 @@
-const glob = require("glob");
-const promisify = require("promisify-node");
 const path = require('path');
-const fs = require('fs');
 const os = require('os');
-const childProcess = require('child_process');
 
-
-const stat = promisify(fs.stat);
-const rmDir = promisify(fs.rmdir);
-const mkDir = promisify(fs.mkdir);
-const mkTempDir = promisify(fs.mkdtemp);
-const findFiles = promisify(glob);
-
-
-const cwd = process.cwd();
-
-
-const configPaths = [
-  {
-    fileName: 'packer.config.js',
-    load: require
-  },
-  {
-    fileName: 'packer.config.json',
-    load: require
-  },
-  {
-    fileName: 'packer.config.yml',
-    load: (fileName) => {/* load yml */}
-  }
-];
-
-const checkFile = (fileName) => {
-  return stat(path.resolve(cwd, fileName)).then(
-    () => fileName
-  ).catch(
-    () => false
-  );
-};
-
-const loadConfig = () => {
-  return configPaths.reduce((acc, { fileName, load }) => {
-    return acc.then((config) => !!config ? acc : checkFile(fileName).then((fileName) => {
-      return fileName ? load(path.resolve(cwd, fileName)) : false;
-    }));
-  }, Promise.resolve(false));
-}
-
-const DEFAULT_CONFIG = {
-  tempDir: `${os.tmpdir()}${path.sep}`,
-  exclude: []
-}
+const loadConfig = require('./load-config');
+const { findFiles, mkTempDir, getCwd } = require('./helpers');
 
 
 const processConfig = (config, index) => { //maybe rename it
   return Promise.resolve(config)
-    .then((config) => Object.assign({}, DEFAULT_CONFIG, config))
     .then((config) => {
-      return mkTempDir(config.tempDir).then(() => config);
+      return mkTempDir(`${os.tmpdir()}${path.sep}`).then((folderName) => {
+        return Object.assign(config, {
+          tempDir: folderName
+        });
+      });
     })
     .then((config) => {
       return findFiles(`*(${config.files.join('|')})`, { matchBase: true, ignore: config.ignore }).then((files) => {
-        console.log(234, files);
+        console.log(234, files, config);
       });
     })
     .then(() => 'processed config #' + index)
@@ -69,7 +24,6 @@ const processConfig = (config, index) => { //maybe rename it
 
 Promise.resolve(true)
   .then(loadConfig)
-  .then((config) => [].concat(config))
   .then((configs) => Promise.all(configs.map(processConfig)))
   .then(console.log)
 
