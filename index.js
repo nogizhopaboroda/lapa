@@ -2,7 +2,33 @@ const path = require('path');
 const os = require('os');
 
 const loadConfig = require('./load-config');
-const { findFiles, copyFile, mkTempDir, getCwd } = require('./helpers');
+const { findFiles, copyFile, mkTempDir, exec, getCwd } = require('./helpers');
+
+
+const environmentConfigs = {
+  python: {
+    installDependencies(dependencies){
+      return `pip install --prefix=./ ${dependencies.join(' ')}`;
+    },
+    installDependencyFile(file){
+      return [
+        `cp ${file} requirements.txt`,
+        `pip install --prefix=./ -r requirements.txt`
+      ];
+    }
+  },
+  node: {
+    installDependencies(dependencies){
+      return `npm install ${dependencies.join(' ')}`;
+    },
+    installDependencyFile(file){
+      return [
+        `cp ${file} package.json`,
+        `npm install`
+      ];
+    }
+  }
+}
 
 
 const processConfig = (config, index) => { //maybe rename it
@@ -20,6 +46,11 @@ const processConfig = (config, index) => { //maybe rename it
       return copyFilesPromise.then(() => config);
     })
     .then((config) => {
+      const commands = [].concat(environmentConfigs[config.environment].installDependencies(config.dependencies));
+      const commandsPromise = commands.reduce((acc, command) => {
+        return acc.then(() => exec(command, { cwd: config.tempDir }));
+      }, Promise.resolve());
+      commandsPromise.then(console.log);
       console.log(config);
       return config;
     })
