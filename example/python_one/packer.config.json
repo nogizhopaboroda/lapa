@@ -1,0 +1,7 @@
+{
+  "files": "*.py",
+  "ignore": "secrets.py",
+  "dependencies": ["requests"],
+  "zipName": "./example_lambda.zip",
+  "environment": "python"
+}
