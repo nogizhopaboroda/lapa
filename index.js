@@ -62,19 +62,3 @@ Promise.resolve(true)
   .then((configs) => Promise.all(configs.map(processConfig)))
   .then(console.log)
 
-
-
-//console.log(config);
-////console.log(process.cwd());
-////exec('pip --version', (err, stdout, stderr) => {
-  ////if (err) {
-    ////// node couldn't execute the command
-    ////return;
-  ////}
-
-  ////// the *entire* stdout and stderr (buffered)
-  ////console.log(`stdout: ${stdout}`);
-  ////console.log(`stderr: ${stderr}`);
-////});
-////
-
