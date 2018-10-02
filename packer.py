@@ -1,3 +1,6 @@
+# TODO: handle upper level files in config, e.g. { files: ['../*.py'] }
+
+
 import fnmatch
 import os
 
@@ -34,6 +37,34 @@ cwd = os.getcwd()
 
 this_dir = os.path.join(cwd, '')
 
+DEFAULT_CONFIG = {
+    'files': ['*'],
+    'ignore': [],
+    'zipName': 'lambda.zip'
+}
+
+
+def cast_list(val):
+    return [val] if type(val) is not list else val
+
+def enhance_config(config):
+
+    configs = cast_list(config)
+    enhanced_configs = []
+
+    for item in configs:
+        enhanced_config = {}
+        enhanced_config.update(DEFAULT_CONFIG)
+        enhanced_config.update(item)
+
+        enhanced_config.update({
+            'files': cast_list(enhanced_config['files']),
+            'ignore': cast_list(enhanced_config['ignore']),
+        })
+
+        enhanced_configs.append(enhanced_config)
+
+    return enhanced_configs
 
 
 config = [{
@@ -47,6 +78,10 @@ config = [{
   # //dist: '<filder>',
   "zipName": 'example_lambda.zip', #optional take package.json name or directory name
 }]
+
+print(enhance_config(config))
+
+exit()
 
 
 files = []
