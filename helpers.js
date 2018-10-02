@@ -11,6 +11,7 @@ const cwd = process.cwd();
 
 module.exports = {
   stat: promisify(fs.stat),
+  copyFile: promisify(fs.copyFile),
   rmDir: promisify(fs.rmdir),
   mkDir: promisify(fs.mkdir),
   mkTempDir: promisify(fs.mkdtemp),

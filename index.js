@@ -2,7 +2,7 @@ const path = require('path');
 const os = require('os');
 
 const loadConfig = require('./load-config');
-const { findFiles, mkTempDir, getCwd } = require('./helpers');
+const { findFiles, copyFile, mkTempDir, getCwd } = require('./helpers');
 
 
 const processConfig = (config, index) => { //maybe rename it
@@ -15,9 +15,13 @@ const processConfig = (config, index) => { //maybe rename it
       });
     })
     .then((config) => {
-      return findFiles(`*(${config.files.join('|')})`, { matchBase: true, ignore: config.ignore }).then((files) => {
-        console.log(234, files, config);
-      });
+      const filesPromise = findFiles(`*(${config.files.join('|')})`, { matchBase: true, ignore: config.ignore });
+      const copyFilesPromise = filesPromise.then((files) => Promise.all(files.map((file) => copyFile(file, path.join(config.tempDir, file)))));
+      return copyFilesPromise.then(() => config);
+    })
+    .then((config) => {
+      console.log(config);
+      return config;
     })
     .then(() => 'processed config #' + index)
 }
