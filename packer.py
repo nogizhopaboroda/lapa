@@ -137,17 +137,13 @@ environmentConfigs = {
             'pip install --prefix=./ -r requirements.txt'
         ],
     },
-  # "node": {
-    # installDependencies(dependencies){
-      # return `npm install ${dependencies.join(' ')}`;
-    # },
-    # installDependencyFile(file){
-      # return [
-        # `cp ${file} package.json`,
-        # `npm install`
-      # ];
-    # }
-  # }
+    'node': {
+        'install_dependencies': 'npm install {dependencies}',
+        'install_dependency_file': [
+            'cp {dependency_file} package.json',
+            'npm install'
+        ],
+    },
 }
 
 def install_dependencies(config):
