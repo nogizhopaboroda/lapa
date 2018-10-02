@@ -1,55 +1,37 @@
-# import os
-# import glob
-
-# for filename in glob.glob('lib/**', recursive=True):
-    # print(filename)
-
-
-
-
-
-
-# import os, fnmatch
-
-# def find_files(directory, pattern='*'):
-    # if not os.path.exists(directory):
-        # raise ValueError("Directory not found {}".format(directory))
-
-    # matches = []
-    # for root, dirnames, filenames in os.walk(directory):
-        # for filename in filenames:
-            # full_path = os.path.join(root, filename)
-            # if fnmatch.filter([full_path], pattern):
-                # matches.append(os.path.join(root, filename))
-    # return matches
-
-# print(find_files('.', './lib/**'))
-
-
-
-
-
-# import fnmatch
-# import os
-
-# matches = []
-# for root, dirnames, filenames in os.walk('./'):
-    # for filename in fnmatch.filter(filenames, './lib/**'):
-        # matches.append(os.path.join(root, filename))
-
-
-
-
-# import fnmatch
-# fnmatch.filter(['./foo.js', 'lib/hh.js'], 'lib/*')
-
-
-
-
 import fnmatch
 import os
 
+
+
+try:
+    input = raw_input
+except NameError:
+    pass
+
+
+# run shell commands
+# import subprocess
+
+# p = subprocess.Popen('ls -la', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd='/var/folders/jg/c8j3dyfx3h3bfnk_z538x24m5xj24d/T/1iLhKb')
+# for line in p.stdout.readlines():
+    # print line,
+# retval = p.wait()
+
+
+# create temp directory
+# import tempfile
+# foo = tempfile.mkdtemp()
+# print(foo)
+
+
+#read node config
+# node -p "JSON.stringify(require('`pwd`/packer.config.js'))"
+
+
+
+
 cwd = os.getcwd()
+
 this_dir = os.path.join(cwd, '')
 
 
@@ -63,9 +45,8 @@ config = [{
   # //include: [],
   "environment": 'python',
   # //dist: '<filder>',
-  "zipName": './example_lambda.zip', #optional take package.json name or directory name
+  "zipName": 'example_lambda.zip', #optional take package.json name or directory name
 }]
-
 
 
 files = []
@@ -82,4 +63,7 @@ files_to_ignore = []
 for pattern in config[0]['ignore']:
     files_to_ignore.extend(fnmatch.filter(files, pattern))
 
-print(list(set(files_to_add) - set(files_to_ignore)))
+files_to_copy = list(set(files_to_add) - set(files_to_ignore))
+
+for x in files_to_copy:
+    print(x)
