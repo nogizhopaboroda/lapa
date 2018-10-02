@@ -6,6 +6,7 @@ import os
 import json
 import tempfile
 import subprocess
+import shutil
 
 
 
@@ -46,12 +47,34 @@ def load_js(file_name):
     res = exec_command('node -p "JSON.stringify(require(\'./{}\'))"'.format(file_name))
     return json.loads(res[0])
 
-# print('---')
-# print(load_js('packer.config.js'))
-# print(load_json('packer.config.json'))
 
-# exit()
+def find_files(file_patterns, ignore_patterns):
+    files = []
+    for root, dirnames, filenames in os.walk(this_dir):
+        dirname = os.path.join(root, '').replace(this_dir, '')
+        for filename in filenames:
+            files.append(os.path.join(dirname, filename))
 
+    files_to_add = []
+    for pattern in file_patterns:
+        files_to_add.extend(fnmatch.filter(files, pattern))
+
+    files_to_ignore = []
+    for pattern in ignore_patterns:
+        files_to_ignore.extend(fnmatch.filter(files, pattern))
+
+    return list(set(files_to_add) - set(files_to_ignore))
+
+def copy_files(files, target):
+    for file_name in cast_list(files):
+        dest = os.path.join(target, file_name)
+        if not os.path.exists(os.path.dirname(dest)):
+            os.makedirs(os.path.dirname(dest))
+        shutil.copy(file_name, dest)
+
+
+
+# load/process config
 config_paths = [
   {
     'fileName': 'packer.config.json',
@@ -76,11 +99,11 @@ def load_config():
 DEFAULT_CONFIG = {
     'files': ['*'],
     'ignore': [],
+    'dependencies': [],
     'zipName': 'lambda.zip'
 }
 
 def enhance_config(config):
-
     configs = cast_list(config)
     enhanced_configs = []
 
@@ -92,6 +115,7 @@ def enhance_config(config):
         enhanced_config.update({
             'files': cast_list(enhanced_config['files']),
             'ignore': cast_list(enhanced_config['ignore']),
+            'dependencies': cast_list(enhanced_config['dependencies']),
             'tempDir': tempfile.mkdtemp() if 'tempDir' not in enhanced_config else enhanced_config['tempDir']
         })
 
@@ -100,32 +124,58 @@ def enhance_config(config):
     return enhanced_configs
 
 
-def find_files(file_patterns, ignore_patterns):
-    files = []
-    for root, dirnames, filenames in os.walk(this_dir):
-        dirname = os.path.join(root, '').replace(this_dir, '')
-        for filename in filenames:
-            files.append(os.path.join(dirname, filename))
-
-    files_to_add = []
-    for pattern in file_patterns:
-        files_to_add.extend(fnmatch.filter(files, pattern))
-
-    files_to_ignore = []
-    for pattern in ignore_patterns:
-        files_to_ignore.extend(fnmatch.filter(files, pattern))
-
-    return list(set(files_to_add) - set(files_to_ignore))
 
 
+
+# install stuff
+
+environmentConfigs = {
+    'python': {
+        'install_dependencies': 'pip install --prefix=./ {dependencies}',
+        'install_dependency_file': [
+            'cp {dependency_file} requirements.txt',
+            'pip install --prefix=./ -r requirements.txt'
+        ],
+    },
+  # "node": {
+    # installDependencies(dependencies){
+      # return `npm install ${dependencies.join(' ')}`;
+    # },
+    # installDependencyFile(file){
+      # return [
+        # `cp ${file} package.json`,
+        # `npm install`
+      # ];
+    # }
+  # }
+}
+
+def install_dependencies(config):
+    environment = config['environment']
+    commands = []
+    if 'dependencyFile' in config:
+        commands = cast_list(environmentConfigs[environment]['install_dependency_file'])
+    elif 'dependencies' in config:
+        commands = cast_list(environmentConfigs[environment]['install_dependencies'])
+
+    for command in commands:
+        print(command)
+        values = {
+            'dependencies': ' '.join(config['dependencies']),
+            'dependency_file': config.get('dependencyFile', '')
+        }
+        res = exec_command(command.format(**values), cwd = config['tempDir'])
+        print(res[0])
+
+
+#programm
 def process_config(config):
-    for x in find_files(config['files'], config['ignore']):
-        print(x)
-
-
+    copy_files(find_files(config['files'], config['ignore']), config['tempDir'])
+    install_dependencies(config)
 
 configs = enhance_config(load_config())
 
 for index, config in enumerate(configs):
     print('processing config #{}'.format(index))
+    print(config)
     process_config(config)
