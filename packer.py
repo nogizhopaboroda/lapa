@@ -97,7 +97,7 @@ def enhance_config(config):
     return enhanced_configs
 
 
-def process_config(config):
+def find_files(file_patterns, ignore_patterns):
     files = []
     for root, dirnames, filenames in os.walk(this_dir):
         dirname = os.path.join(root, '').replace(this_dir, '')
@@ -105,16 +105,18 @@ def process_config(config):
             files.append(os.path.join(dirname, filename))
 
     files_to_add = []
-    for pattern in config['files']:
+    for pattern in file_patterns:
         files_to_add.extend(fnmatch.filter(files, pattern))
 
     files_to_ignore = []
-    for pattern in config['ignore']:
+    for pattern in ignore_patterns:
         files_to_ignore.extend(fnmatch.filter(files, pattern))
 
-    files_to_copy = list(set(files_to_add) - set(files_to_ignore))
+    return list(set(files_to_add) - set(files_to_ignore))
 
-    for x in files_to_copy:
+
+def process_config(config):
+    for x in find_files(config['files'], config['ignore']):
         print(x)
 
 
