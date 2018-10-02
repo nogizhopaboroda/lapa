@@ -16,15 +16,6 @@ except NameError:
     pass
 
 
-
-
-
-#read node config
-# node -p "JSON.stringify(require('`pwd`/packer.config.js'))"
-
-
-
-
 cwd = os.getcwd()
 
 this_dir = os.path.join(cwd, '')
@@ -86,6 +77,13 @@ config_paths = [
   },
 ]
 
+DEFAULT_CONFIG = {
+    'files': ['*'],
+    'ignore': [],
+    'dependencies': [],
+    'zipName': 'lambda.zip'
+}
+
 def load_config():
     for item in config_paths:
         file_name = item['fileName']
@@ -93,15 +91,6 @@ def load_config():
             return item['load'](file_name)
 
     return {}
-
-
-
-DEFAULT_CONFIG = {
-    'files': ['*'],
-    'ignore': [],
-    'dependencies': [],
-    'zipName': 'lambda.zip'
-}
 
 def enhance_config(config):
     configs = cast_list(config)
@@ -155,7 +144,6 @@ def install_dependencies(config):
         commands = cast_list(environmentConfigs[environment]['install_dependencies'])
 
     for command in commands:
-        print(command)
         values = {
             'dependencies': ' '.join(config['dependencies']),
             'dependency_file': config.get('dependencyFile', '')
