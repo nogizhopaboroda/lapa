@@ -3,6 +3,8 @@
 
 import fnmatch
 import os
+import json
+import tempfile
 
 
 
@@ -21,12 +23,6 @@ except NameError:
 # retval = p.wait()
 
 
-# create temp directory
-# import tempfile
-# foo = tempfile.mkdtemp()
-# print(foo)
-
-
 #read node config
 # node -p "JSON.stringify(require('`pwd`/packer.config.js'))"
 
@@ -37,15 +33,48 @@ cwd = os.getcwd()
 
 this_dir = os.path.join(cwd, '')
 
+
+# helpers
+def cast_list(val):
+    return [val] if type(val) is not list else val
+
+
+#config functions
+
+def load_json(file_name):
+    with open(file_name) as json_file:
+        return json.load(json_file)
+
+config_paths = [
+  # {
+    # 'fileName': 'packer.config.js',
+    # 'load': load_json
+  # },
+  {
+    'fileName': 'packer.config.json',
+    'load': load_json
+  },
+  # {
+    # 'fileName': 'packer.config.yml',
+    # # load: (fileName) => {/* load yml */}
+  # }
+]
+
+def load_config():
+    for item in config_paths:
+        file_name = item['fileName']
+        if os.path.isfile(file_name):
+            return item['load'](file_name)
+
+    return {}
+
+
+
 DEFAULT_CONFIG = {
     'files': ['*'],
     'ignore': [],
     'zipName': 'lambda.zip'
 }
-
-
-def cast_list(val):
-    return [val] if type(val) is not list else val
 
 def enhance_config(config):
 
@@ -60,6 +89,7 @@ def enhance_config(config):
         enhanced_config.update({
             'files': cast_list(enhanced_config['files']),
             'ignore': cast_list(enhanced_config['ignore']),
+            'tempDir': tempfile.mkdtemp() if 'tempDir' not in enhanced_config else enhanced_config['tempDir']
         })
 
         enhanced_configs.append(enhanced_config)
@@ -67,38 +97,30 @@ def enhance_config(config):
     return enhanced_configs
 
 
-config = [{
-  "files": ['*.py'],
-  # //dependenciesFile: 'package.json|requirements.txt',
-  "dependencies": ['requests'], #optional, replacing dependenciesFile
-  # //excludeDependencies: [], //optional, replacing dependenciesFile
-  "ignore": ['secrets_backup.py', 'lib/**', 'deps/**', 'bin/**'],
-  # //include: [],
-  "environment": 'python',
-  # //dist: '<filder>',
-  "zipName": 'example_lambda.zip', #optional take package.json name or directory name
-}]
+def process_config(config):
+    files = []
+    for root, dirnames, filenames in os.walk(this_dir):
+        dirname = os.path.join(root, '').replace(this_dir, '')
+        for filename in filenames:
+            files.append(os.path.join(dirname, filename))
 
-print(enhance_config(config))
+    files_to_add = []
+    for pattern in config['files']:
+        files_to_add.extend(fnmatch.filter(files, pattern))
 
-exit()
+    files_to_ignore = []
+    for pattern in config['ignore']:
+        files_to_ignore.extend(fnmatch.filter(files, pattern))
+
+    files_to_copy = list(set(files_to_add) - set(files_to_ignore))
+
+    for x in files_to_copy:
+        print(x)
 
 
-files = []
-for root, dirnames, filenames in os.walk(this_dir):
-    dirname = os.path.join(root, '').replace(this_dir, '')
-    for filename in filenames:
-        files.append(os.path.join(dirname, filename))
 
-files_to_add = []
-for pattern in config[0]['files']:
-    files_to_add.extend(fnmatch.filter(files, pattern))
+configs = enhance_config(load_config())
 
-files_to_ignore = []
-for pattern in config[0]['ignore']:
-    files_to_ignore.extend(fnmatch.filter(files, pattern))
-
-files_to_copy = list(set(files_to_add) - set(files_to_ignore))
-
-for x in files_to_copy:
-    print(x)
+for index, config in enumerate(configs):
+    print('processing config #{}'.format(index))
+    process_config(config)
