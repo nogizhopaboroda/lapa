@@ -145,7 +145,7 @@ def install_dependencies(config):
     commands = []
     if 'dependencyFile' in config:
         commands = cast_list(environmentConfigs[environment]['install_dependency_file'])
-    elif 'dependencies' in config:
+    elif len(config['dependencies']) > 0:
         commands = cast_list(environmentConfigs[environment]['install_dependencies'])
 
     for command in commands:
