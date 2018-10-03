@@ -56,11 +56,16 @@ def find_files(file_patterns, ignore_patterns):
 
     return list(set(files_to_add) - set(files_to_ignore))
 
+def ensure_directories(file_name):
+    if not os.path.exists(os.path.dirname(file_name)):
+        os.makedirs(os.path.dirname(file_name))
+    return file_name
+
+
 def copy_files(files, target):
     for file_name in cast_list(files):
         dest = os.path.join(target, file_name)
-        if not os.path.exists(os.path.dirname(dest)):
-            os.makedirs(os.path.dirname(dest))
+        ensure_directories(dest)
         shutil.copy(file_name, dest)
 
 
@@ -152,14 +157,25 @@ def install_dependencies(config):
         print(res[0])
 
 
-#programm
+def archive_directory(path, output_file):
+    shutil.make_archive(
+      output_file.replace('.zip', ''), 'zip', root_dir=path, base_dir='.'
+    )
+
+
+# build flow
 def process_config(config):
     copy_files(find_files(config['files'], config['ignore']), config['tempDir'])
     install_dependencies(config)
+    archive_directory(config['tempDir'], config['zipName'])
 
-configs = enhance_config(load_config())
 
-for index, config in enumerate(configs):
-    print('processing config #{}'.format(index))
-    print(config)
-    process_config(config)
+#programm
+if __name__ == '__main__':
+
+    configs = enhance_config(load_config())
+
+    for index, config in enumerate(configs):
+        print('processing config #{}'.format(index))
+        print(config)
+        process_config(config)
