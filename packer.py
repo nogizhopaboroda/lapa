@@ -6,6 +6,7 @@ import json
 import tempfile
 import subprocess
 import shutil
+import pdb
 
 
 # TODO: handle upper level files in config, e.g. { files: ['../*.py'] }
@@ -127,7 +128,7 @@ def enhance_config(config):
 
 environmentConfigs = {
     'python': {
-        'install_dependencies': 'pip install --prefix=./ {dependencies}',
+        'install_dependencies': 'pip install --upgrade {dependencies} -t .',
         'install_dependency_file': [
             'cp {dependency_file} requirements.txt',
             'pip install --prefix=./ -r requirements.txt'
