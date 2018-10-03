@@ -18,8 +18,6 @@ except NameError:
 
 cwd = os.getcwd()
 
-this_dir = os.path.join(cwd, '')
-
 
 # helpers
 def cast_list(val):
@@ -39,8 +37,9 @@ def load_js(file_name):
     return json.loads(res[0])
 
 
-def find_files(file_patterns, ignore_patterns):
+def find_files(file_patterns, ignore_patterns, cwd = os.getcwd()):
     files = []
+    this_dir = os.path.join(cwd, '')
     for root, dirnames, filenames in os.walk(this_dir):
         dirname = os.path.join(root, '').replace(this_dir, '')
         for filename in filenames:
