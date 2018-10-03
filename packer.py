@@ -1,5 +1,4 @@
-# TODO: handle upper level files in config, e.g. { files: ['../*.py'] }
-
+#!/usr/bin/env python
 
 import fnmatch
 import os
@@ -7,6 +6,10 @@ import json
 import tempfile
 import subprocess
 import shutil
+
+
+# TODO: handle upper level files in config, e.g. { files: ['../*.py'] }
+# TODO: handle src root directory
 
 
 
