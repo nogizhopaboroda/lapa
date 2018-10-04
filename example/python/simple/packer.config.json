@@ -1,5 +1,5 @@
 {
-  "files": "*.py",
+  "files": ["*.py", "setup.cfg"],
   "ignore": "secrets.py",
   "dependencies": ["requests"],
   "zipName": "./dist/example_lambda.zip",
