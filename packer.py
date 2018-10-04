@@ -128,16 +128,16 @@ def enhance_config(config):
 
 environmentConfigs = {
     'python': {
-        'install_dependencies': 'pip install --upgrade {dependencies} -t .',
-        'install_dependency_file': [
-            'cp {dependency_file} requirements.txt',
-            'pip install --prefix=./ -r requirements.txt'
+        'installDependencies': 'pip install --upgrade {dependencies} -t ./',
+        'installDependencyFile': [
+            'cp {dependencyFile} requirements.txt',
+            'pip install -r requirements.txt -t ./'
         ],
     },
     'node': {
-        'install_dependencies': 'npm install {dependencies}',
-        'install_dependency_file': [
-            'cp {dependency_file} package.json',
+        'installDependencies': 'npm install {dependencies}',
+        'installDependencyFile': [
+            'cp {dependencyFile} package.json',
             'npm install'
         ],
     },
@@ -145,16 +145,17 @@ environmentConfigs = {
 
 def install_dependencies(config):
     environment = config['environment']
+    environment_config = environmentConfigs[environment] if type(environment) is str else environment
     commands = []
     if 'dependencyFile' in config:
-        commands = cast_list(environmentConfigs[environment]['install_dependency_file'])
+        commands = cast_list(environment_config['installDependencyFile'])
     elif len(config['dependencies']) > 0:
-        commands = cast_list(environmentConfigs[environment]['install_dependencies'])
+        commands = cast_list(environment_config['installDependencies'])
 
     for command in commands:
         values = {
             'dependencies': ' '.join(config['dependencies']),
-            'dependency_file': config.get('dependencyFile', '')
+            'dependencyFile': config.get('dependencyFile', '')
         }
         res = exec_command(command.format(**values), cwd = config['tempDir'])
         print(res[0])
