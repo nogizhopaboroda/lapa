@@ -6,11 +6,11 @@ import json
 import tempfile
 import subprocess
 import shutil
+import re
 import pdb
 
 
-# TODO: handle upper level files in config, e.g. { files: ['../*.py'] }
-# TODO: handle src root directory
+# TODO: handle upper level files in config, e.g. { searchDirectories: ['../../lib'] }
 
 
 
@@ -65,9 +65,14 @@ def ensure_directories(file_name):
     return file_name
 
 
-def copy_files(files, target):
+def copy_files(files, target, map_dirs = {}):
     for file_name in cast_list(files):
-        dest = os.path.join(target, file_name)
+        file_name_new = file_name
+        for source_dir, target_dir in map_dirs.items():
+            source_dir_regex = r'^{}'.format(os.path.join(source_dir, ''))
+            if re.match(source_dir_regex, file_name):
+                file_name_new = os.path.normpath(re.sub(source_dir_regex, os.path.join(target_dir, ''), file_name))
+        dest = os.path.join(target, file_name_new)
         ensure_directories(dest)
         shutil.copy(file_name, dest)
 
@@ -145,7 +150,7 @@ environmentConfigs = {
 
 def install_dependencies(config):
     environment = config['environment']
-    environment_config = environmentConfigs[environment] if type(environment) is str else environment
+    environment_config = environment if type(environment) is dict else environmentConfigs[environment]
     commands = []
     if 'dependencyFile' in config:
         commands = cast_list(environment_config['installDependencyFile'])
@@ -169,7 +174,7 @@ def archive_directory(path, output_file):
 
 # build flow
 def process_config(config):
-    copy_files(find_files(config['files'], config['ignore']), config['tempDir'])
+    copy_files(find_files(config['files'], config['ignore']), config['tempDir'], config.get('mapDirectories', {}))
     install_dependencies(config)
     archive_directory(config['tempDir'], config['zipName'])
 
