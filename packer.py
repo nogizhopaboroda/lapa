@@ -97,11 +97,12 @@ DEFAULT_CONFIG = {
     'zipName': 'lambda.zip'
 }
 
-def load_config():
+def load_config(cwd=cwd):
     for item in config_paths:
         file_name = item['fileName']
-        if os.path.isfile(file_name):
-            return item['load'](file_name)
+        file_path = os.path.join(cwd, file_name)
+        if os.path.isfile(file_path):
+            return item['load'](file_path)
 
     return {}
 
@@ -182,7 +183,7 @@ def process_config(config):
 #programm
 if __name__ == '__main__':
 
-    configs = enhance_config(load_config())
+    configs = enhance_config(load_config(cwd))
 
     for index, config in enumerate(configs):
         print('processing config #{}'.format(index))
