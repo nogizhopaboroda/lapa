@@ -52,19 +52,19 @@ class CopyFiles(unittest.TestCase):
     def test_case_1(self, copy_patch, ensure_directories_patch):
         copy_patch.return_value = 'ok'
         ensure_directories_patch.return_value = 'ok'
-        copy_files(['foo.py'], '/bar', map_dirs = {})
+        copy_files(['foo.py'], '/bar', cwd = '', map_dirs = {})
         copy_patch.assert_called_with('foo.py', '/bar/foo.py')
 
     def test_case_2(self, copy_patch, ensure_directories_patch):
         copy_patch.return_value = 'ok'
         ensure_directories_patch.return_value = 'ok'
-        copy_files(['foo.py', 'bar.py', 'src/bla.py', 'src2/quux', 'src3/booz.py'], '/bar', map_dirs = { "src": "./", "src2": "", "src3": "src_remapped" })
+        copy_files(['foo.py', 'bar.py', 'src/bla.py', 'src2/quux', 'src3/booz.py'], '/bar', cwd = '/mock_cwd', map_dirs = { "src": "./", "src2": "", "src3": "src_remapped" })
         copy_patch.assert_has_calls([
-            call('foo.py', '/bar/foo.py'),
-            call('bar.py', '/bar/bar.py'),
-            call('src/bla.py', '/bar/bla.py'),
-            call('src2/quux', '/bar/quux'),
-            call('src3/booz.py', '/bar/src_remapped/booz.py'),
+            call('/mock_cwd/foo.py', '/bar/foo.py'),
+            call('/mock_cwd/bar.py', '/bar/bar.py'),
+            call('/mock_cwd/src/bla.py', '/bar/bla.py'),
+            call('/mock_cwd/src2/quux', '/bar/quux'),
+            call('/mock_cwd/src3/booz.py', '/bar/src_remapped/booz.py'),
         ])
 
 # environments

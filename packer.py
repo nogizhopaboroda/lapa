@@ -176,7 +176,7 @@ def archive_directory(path, output_file):
 # build flow
 def process_config(config):
     files = find_files(config['files'], config['ignore'])
-    copy_files(files, config['tempDir'], config.get('mapDirectories', {}))
+    copy_files(files, config['tempDir'], map_dirs = config.get('mapDirectories', {}))
     install_dependencies(config)
     archive_directory(config['tempDir'], config['zipName'])
 
