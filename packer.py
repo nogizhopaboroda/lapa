@@ -37,7 +37,7 @@ def load_json(file_name):
         return json.load(json_file)
 
 def load_js(file_name):
-    res = exec_command('node -p "JSON.stringify(require(\'./{}\'))"'.format(file_name))
+    res = exec_command('node -p "JSON.stringify(require(\'{}\'))"'.format(file_name))
     return json.loads(res[0])
 
 
@@ -144,7 +144,7 @@ environmentConfigs = {
         'installDependencies': 'npm install {dependencies}',
         'installDependencyFile': [
             'cp {dependencyFile} package.json',
-            'npm install'
+            'npm install --production'
         ],
     },
 }
@@ -175,7 +175,8 @@ def archive_directory(path, output_file):
 
 # build flow
 def process_config(config):
-    copy_files(find_files(config['files'], config['ignore']), config['tempDir'], config.get('mapDirectories', {}))
+    files = find_files(config['files'], config['ignore'])
+    copy_files(files, config['tempDir'], config.get('mapDirectories', {}))
     install_dependencies(config)
     archive_directory(config['tempDir'], config['zipName'])
 
