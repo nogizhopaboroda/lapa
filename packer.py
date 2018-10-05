@@ -65,7 +65,7 @@ def ensure_directories(file_name):
     return file_name
 
 
-def copy_files(files, target, map_dirs = {}):
+def copy_files(files, target, cwd = os.getcwd(), map_dirs = {}):
     for file_name in cast_list(files):
         file_name_new = file_name
         for source_dir, target_dir in map_dirs.items():
@@ -74,7 +74,7 @@ def copy_files(files, target, map_dirs = {}):
                 file_name_new = os.path.normpath(re.sub(source_dir_regex, os.path.join(target_dir, ''), file_name))
         dest = os.path.join(target, file_name_new)
         ensure_directories(dest)
-        shutil.copy(file_name, dest)
+        shutil.copy(os.path.join(cwd, file_name), dest)
 
 
 
