@@ -1,9 +1,9 @@
 import unittest
 import os
 
-from unittest.mock import patch
+from unittest.mock import patch, call
 
-from packer import DEFAULT_CONFIG, load_config, enhance_config, exec_command, install_dependencies
+from packer import DEFAULT_CONFIG, load_config, enhance_config, copy_files, exec_command, install_dependencies
 import packer
 
 cwd = os.getcwd()
@@ -44,6 +44,28 @@ class EnhanceConfig(unittest.TestCase):
         self.assertEqual(config['ignore'], ['*'])
         self.assertEqual(config['dependencies'], ['all'])
 
+# copy files
+@patch('packer.ensure_directories')
+@patch('shutil.copy')
+class CopyFiles(unittest.TestCase):
+
+    def test_case_1(self, copy_patch, ensure_directories_patch):
+        copy_patch.return_value = 'ok'
+        ensure_directories_patch.return_value = 'ok'
+        copy_files(['foo.py'], '/bar', map_dirs = {})
+        copy_patch.assert_called_with('foo.py', '/bar/foo.py')
+
+    def test_case_2(self, copy_patch, ensure_directories_patch):
+        copy_patch.return_value = 'ok'
+        ensure_directories_patch.return_value = 'ok'
+        copy_files(['foo.py', 'bar.py', 'src/bla.py', 'src2/quux', 'src3/booz.py'], '/bar', map_dirs = { "src": "./", "src2": "", "src3": "src_remapped" })
+        copy_patch.assert_has_calls([
+            call('foo.py', '/bar/foo.py'),
+            call('bar.py', '/bar/bar.py'),
+            call('src/bla.py', '/bar/bla.py'),
+            call('src2/quux', '/bar/quux'),
+            call('src3/booz.py', '/bar/src_remapped/booz.py'),
+        ])
 
 # environments
 @patch('packer.exec_command')
