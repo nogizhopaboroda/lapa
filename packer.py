@@ -7,11 +7,13 @@ import tempfile
 import subprocess
 import shutil
 import re
+import logging
 import pdb
 
 
 # TODO: handle upper level files in config, e.g. { searchDirectories: ['../../lib'] }
 
+logger = logging.getLogger('packer')
 
 
 try:
@@ -28,17 +30,17 @@ def cast_list(val):
     return [val] if type(val) is not list else val
 
 def exec_command(command, cwd = None, sync = True):
+    logger.debug('Executing command: {}'.format(command))
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
     if sync is True:
         return p.communicate()
 
     stdout = ''
     while(True):
-        retcode = p.poll() #returns None while subprocess is running
+        retcode = p.poll()
         line = p.stdout.readline()
         stdout += line
-        print(line)
-        #log(line)
+        logger.info(line)
         if(retcode is not None):
             break
     return (stdout, None)
@@ -87,7 +89,9 @@ def copy_files(files, target, cwd = os.getcwd(), map_dirs = {}):
                 file_name_new = os.path.normpath(re.sub(source_dir_regex, os.path.join(target_dir, ''), file_name))
         dest = os.path.join(target, file_name_new)
         ensure_directories(dest)
-        shutil.copy(os.path.join(cwd, file_name), dest)
+        source = os.path.join(cwd, file_name)
+        logger.debug('{} -> {}'.format(source, dest))
+        shutil.copy(source, dest)
 
 
 
@@ -115,8 +119,10 @@ def load_config(cwd=cwd):
         file_name = item['fileName']
         file_path = os.path.join(cwd, file_name)
         if os.path.isfile(file_path):
+            logger.info('Using config: {}'.format(file_path))
             return item['load'](file_path)
 
+    logger.info('Could not find packer config. Using default')
     return {}
 
 def enhance_config(config):
@@ -176,8 +182,8 @@ def install_dependencies(config):
             'dependencies': ' '.join(config['dependencies']),
             'dependencyFile': config.get('dependencyFile', '')
         }
-        res = exec_command(command.format(**values), cwd = config['tempDir'], sync = False)
-        print(res[0])
+        formatted_command = command.format(**values)
+        res = exec_command(formatted_command, cwd = config['tempDir'], sync = False)
 
 
 def archive_directory(path, output_file):
@@ -189,17 +195,32 @@ def archive_directory(path, output_file):
 # build flow
 def process_config(config):
     files = find_files(config['files'], config['ignore'])
+    logger.info('Found {} files to copy'.format(len(files)))
+    logger.info('Copying files to temp dir: {}'.format(config['tempDir']))
     copy_files(files, config['tempDir'], map_dirs = config.get('mapDirectories', {}))
+    logger.info('Installing dependencies:'.format(config['tempDir']))
     install_dependencies(config)
     archive_directory(config['tempDir'], config['zipName'])
+    logger.info('Built output archive to: {}'.format(config['zipName']))
 
 
 #programm
 if __name__ == '__main__':
 
-    configs = enhance_config(load_config(cwd))
+    verbose = False
+
+    logger = logging.getLogger()
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('%(message)s\n'))
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG if verbose is True else logging.INFO)
+
+    logger.info('searching for packer config in {}'.format(cwd))
+    user_config = load_config(cwd)
+    logger.debug('packer config:\n{}'.format(json.dumps(user_config, indent = 4)))
+
+    configs = enhance_config(user_config)
 
     for index, config in enumerate(configs):
-        print('processing config #{}'.format(index))
-        print(config)
+        logger.info('processing config item #{}'.format(index + 1))
         process_config(config)
