@@ -44,6 +44,7 @@ class EnhanceConfig(unittest.TestCase):
         self.assertEqual(config['ignore'], ['*'])
         self.assertEqual(config['dependencies'], ['all'])
 
+
 # copy files
 @patch('packer.ensure_directories')
 @patch('shutil.copy')
@@ -58,7 +59,10 @@ class CopyFiles(unittest.TestCase):
     def test_case_2(self, copy_patch, ensure_directories_patch):
         copy_patch.return_value = 'ok'
         ensure_directories_patch.return_value = 'ok'
-        copy_files(['foo.py', 'bar.py', 'src/bla.py', 'src2/quux', 'src3/booz.py'], '/bar', cwd = '/mock_cwd', map_dirs = { "src": "./", "src2": "", "src3": "src_remapped" })
+        copy_files(
+                ['foo.py', 'bar.py', 'src/bla.py', 'src2/quux', 'src3/booz.py'], '/bar',
+                cwd = '/mock_cwd', map_dirs = { "src": "./", "src2": "", "src3": "src_remapped" }
+        )
         copy_patch.assert_has_calls([
             call('/mock_cwd/foo.py', '/bar/foo.py'),
             call('/mock_cwd/bar.py', '/bar/bar.py'),
@@ -67,6 +71,7 @@ class CopyFiles(unittest.TestCase):
             call('/mock_cwd/src3/booz.py', '/bar/src_remapped/booz.py'),
         ])
 
+
 # environments
 @patch('packer.exec_command')
 class InstallDependencies(unittest.TestCase):
@@ -74,7 +79,7 @@ class InstallDependencies(unittest.TestCase):
     def test_case_1(self, test_patch):
         test_patch.return_value = 'ok'
         ret = install_dependencies({"environment": "node", "dependencies": ["foo", "baz"], "tempDir": "/bar"})
-        test_patch.assert_called_with('npm install foo baz', cwd = '/bar')
+        test_patch.assert_called_with('npm install foo baz', cwd = '/bar', sync = False)
 
 
 if __name__ == '__main__':

@@ -27,9 +27,22 @@ cwd = os.getcwd()
 def cast_list(val):
     return [val] if type(val) is not list else val
 
-def exec_command(command, cwd = None, silent = True):
+def exec_command(command, cwd = None, sync = True):
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
-    return p.communicate()
+    if sync is True:
+        return p.communicate()
+
+    stdout = ''
+    while(True):
+        retcode = p.poll() #returns None while subprocess is running
+        line = p.stdout.readline()
+        stdout += line
+        print(line)
+        #log(line)
+        if(retcode is not None):
+            break
+    return (stdout, None)
+
 
 
 def load_json(file_name):
@@ -163,7 +176,7 @@ def install_dependencies(config):
             'dependencies': ' '.join(config['dependencies']),
             'dependencyFile': config.get('dependencyFile', '')
         }
-        res = exec_command(command.format(**values), cwd = config['tempDir'])
+        res = exec_command(command.format(**values), cwd = config['tempDir'], sync = False)
         print(res[0])
 
 
