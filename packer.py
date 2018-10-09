@@ -8,6 +8,7 @@ import subprocess
 import shutil
 import re
 import logging
+import argparse
 import pdb
 
 
@@ -204,10 +205,16 @@ def process_config(config):
     logger.info('Built output archive to: {}'.format(config['zipName']))
 
 
-#programm
+# programm
 if __name__ == '__main__':
 
-    verbose = False
+    parser=argparse.ArgumentParser()
+
+    parser.add_argument('-V', '--verbose', action="store_true", help='Increase output verbosity')
+
+    args = parser.parse_args()
+
+    verbose = args.verbose
 
     logger = logging.getLogger()
     handler = logging.StreamHandler()
@@ -215,7 +222,7 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG if verbose is True else logging.INFO)
 
-    logger.info('searching for packer config in {}'.format(cwd))
+    logger.debug('searching for packer config in {}'.format(cwd))
     user_config = load_config(cwd)
     logger.debug('packer config:\n{}'.format(json.dumps(user_config, indent = 4)))
 
@@ -224,3 +231,4 @@ if __name__ == '__main__':
     for index, config in enumerate(configs):
         logger.info('processing config item #{}'.format(index + 1))
         process_config(config)
+
