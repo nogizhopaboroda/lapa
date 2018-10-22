@@ -1,0 +1,12 @@
+{
+  "files": [
+    "*"
+  ], 
+  "environment": "python", 
+  "zipName": "lambda.zip", 
+  "dependencyFile": "requirements.txt", 
+  "ignore": [
+    "lib/*"
+  ], 
+  "dependencies": []
+}
