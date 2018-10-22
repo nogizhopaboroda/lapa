@@ -137,11 +137,9 @@ def enhance_config(config):
         enhanced_config.update(DEFAULT_CONFIG)
         enhanced_config.update(item)
 
-        ignore_masks = cast_list(enhanced_config['ignore']) + map(lambda x: x['fileName'], config_paths) + [enhanced_config['zipName']]
-
         enhanced_config.update({
             'files': cast_list(enhanced_config['files']),
-            'ignore': ignore_masks,
+            'ignore': cast_list(enhanced_config['ignore']),
             'dependencies': cast_list(enhanced_config['dependencies']),
             'tempDir': tempfile.mkdtemp() if 'tempDir' not in enhanced_config else enhanced_config['tempDir']
         })
@@ -211,7 +209,8 @@ def archive_directory(path, output_file):
 
 # build flow
 def process_config(config):
-    files = find_files(config['files'], config['ignore'])
+    ignore_masks = config['ignore'] + list(map(lambda x: x['fileName'], config_paths)) + [config['zipName']]
+    files = find_files(config['files'], ignore_masks)
     logger.info('Found {} files to copy'.format(len(files)))
     logger.info('Copying files to temp dir: {}'.format(config['tempDir']))
     copy_files(files, config['tempDir'], map_dirs = config.get('mapDirectories', {}))

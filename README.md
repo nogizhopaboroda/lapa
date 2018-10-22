@@ -5,5 +5,5 @@ universal lambda packager
 ##
 
 ```sh
-python <(curl http://file_address) [arguments]
+python <(curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/packer.py) [arguments]
 ```
