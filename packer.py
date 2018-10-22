@@ -156,24 +156,28 @@ def enhance_config(config):
 
 environmentConfigs = {
     'python': {
-        'installDependencies': 'pip install --upgrade {dependencies} -t ./',
-        'installDependencyFile': [
-            'cp {dependencyFile} requirements.txt',
-            'pip install -r requirements.txt -t ./'
-        ],
+        'installCommands': {
+            'installDependencies': 'pip install --upgrade {dependencies} -t ./',
+            'installDependencyFile': [
+                'cp {dependencyFile} requirements.txt',
+                'pip install -r requirements.txt -t ./'
+            ],
+        }
     },
     'node': {
-        'installDependencies': 'npm install {dependencies}',
-        'installDependencyFile': [
-            'cp {dependencyFile} package.json',
-            'npm install --production'
-        ],
+        'installCommands': {
+            'installDependencies': 'npm install {dependencies}',
+            'installDependencyFile': [
+                'cp {dependencyFile} package.json',
+                'npm install --production'
+            ],
+        }
     },
 }
 
 def install_dependencies(config):
     environment = config['environment']
-    environment_config = environment if type(environment) is dict else environmentConfigs[environment]
+    environment_config = environment if type(environment) is dict else environmentConfigs[environment]['installCommands']
     commands = []
     if 'dependencyFile' in config:
         commands = cast_list(environment_config['installDependencyFile'])
