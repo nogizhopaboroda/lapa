@@ -215,8 +215,8 @@ def process_config(config):
     logger.info('Built output archive to: {}'.format(config['zipName']))
 
 
-def better_input(question, default_value = ''):
-    prepared_default = '({})'.format(bold(default_value)) if default_value != '' else ''
+def better_input(question, default_value = None):
+    prepared_default = '({})'.format(bold(default_value)) if default_value is not None else ''
     val = input('{}: {} '.format(question, prepared_default))
     if val == '' and default_value != '':
         return default_value
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
         extensions = [x.split('.')[-1] for x in find_files(['*.*'], [])]
         most_common_extension = max(set(extensions), key=extensions.count)
-        environment_prediction = ''
+        environment_prediction = None
         for environment_name, config in environmentConfigs.items():
             if most_common_extension in config['mostCommonExtensions']:
                 environment_prediction = environment_name
