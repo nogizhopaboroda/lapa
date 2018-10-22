@@ -156,6 +156,8 @@ def enhance_config(config):
 
 environmentConfigs = {
     'python': {
+        'mostCommonExtensions': ['py'],
+        'defaultDependencyFile': 'requirements.txt',
         'installCommands': {
             'installDependencies': 'pip install --upgrade {dependencies} -t ./',
             'installDependencyFile': [
@@ -165,6 +167,8 @@ environmentConfigs = {
         }
     },
     'node': {
+        'mostCommonExtensions': ['js'],
+        'defaultDependencyFile': 'package.json',
         'installCommands': {
             'installDependencies': 'npm install {dependencies}',
             'installDependencyFile': [
@@ -230,21 +234,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.init is True:
+        print('This utility will create a packeger configuration file')
+
         available_environments = environmentConfigs.keys()
 
         extensions = [x.split('.')[-1] for x in find_files(['*.*'], [])]
         most_common_extension = max(set(extensions), key=extensions.count)
         environment_prediction = ''
-        if most_common_extension == 'js':
-            environment_prediction = 'node'
-        elif most_common_extension == 'py':
-            environment_prediction = 'python'
-        print('This utility will create a packeger configuration file')
+        for environment_name, config in environmentConfigs.items():
+            if most_common_extension in config['mostCommonExtensions']:
+                environment_prediction = environment_name
+                break
         while True:
-            environment = better_input('environment [available options: node / python]', environment_prediction)
+            environment = better_input(
+                    'environment [available options: {}]'.format(' / '.join(available_environments)),
+                    environment_prediction
+            )
             if environment in available_environments:
                 break
             print('please select one of the available environments')
+
         zip_name = better_input('zip name', DEFAULT_CONFIG['zipName'])
 
         config = DEFAULT_CONFIG.copy()
@@ -258,6 +267,7 @@ if __name__ == '__main__':
         with open(file_name, 'w') as f:
             f.write(json.dumps(config, indent = 2))
             print('Saved config to {}'.format(file_name))
+
         exit()
 
     verbose = args.verbose
