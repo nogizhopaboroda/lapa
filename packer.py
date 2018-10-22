@@ -158,6 +158,8 @@ environmentConfigs = {
     'python': {
         'mostCommonExtensions': ['py'],
         'defaultDependencyFile': 'requirements.txt',
+        'defaultFiles': ['*.py'],
+        'defaultIgnore': ['lib/*'],
         'installCommands': {
             'installDependencies': 'pip install --upgrade {dependencies} -t ./',
             'installDependencyFile': [
@@ -169,6 +171,8 @@ environmentConfigs = {
     'node': {
         'mostCommonExtensions': ['js'],
         'defaultDependencyFile': 'package.json',
+        'defaultFiles': ['*.js', '*.json'],
+        'defaultIgnore': ['node_modules/*'],
         'installCommands': {
             'installDependencies': 'npm install {dependencies}',
             'installDependencyFile': [
@@ -254,14 +258,27 @@ if __name__ == '__main__':
                 break
             print('please select one of the available environments')
 
+        dependencies_file_name = environmentConfigs[environment]['defaultDependencyFile']
+        dependencies_file_path = os.path.join(cwd, dependencies_file_name)
+        use_default_dependencies_file = os.path.isfile(dependencies_file_path) and better_input(
+                'use {} as dependencies file ?'.format(bold(dependencies_file_name)),
+                'yes'
+        ) is 'yes'
+
         zip_name = better_input('zip name', DEFAULT_CONFIG['zipName'])
 
         config = DEFAULT_CONFIG.copy()
         config.update(DEFAULT_CONFIG)
         config.update({
             'environment': environment,
-            'zipName': zip_name
+            'zipName': zip_name,
+            'ignore': environmentConfigs[environment]['defaultIgnore'],
         })
+
+        if use_default_dependencies_file is True:
+            config.update({
+                'dependencyFile': dependencies_file_name,
+            })
 
         file_name = os.path.join(cwd, 'packer.config.json')
         with open(file_name, 'w') as f:
