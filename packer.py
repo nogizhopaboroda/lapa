@@ -239,7 +239,7 @@ if __name__ == '__main__':
         available_environments = environmentConfigs.keys()
 
         extensions = [x.split('.')[-1] for x in find_files(['*.*'], [])]
-        most_common_extension = max(set(extensions), key=extensions.count)
+        most_common_extension = max(set(extensions), key=extensions.count) if extensions else None
         environment_prediction = None
         for environment_name, config in environmentConfigs.items():
             if most_common_extension in config['mostCommonExtensions']:
@@ -247,7 +247,7 @@ if __name__ == '__main__':
                 break
         while True:
             environment = better_input(
-                    'environment [available options: {}]'.format(' / '.join(available_environments)),
+                    'environment [{}]'.format(' / '.join(available_environments)),
                     environment_prediction
             )
             if environment in available_environments:
