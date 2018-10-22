@@ -46,6 +46,8 @@ def exec_command(command, cwd = None, sync = True):
             break
     return (stdout, None)
 
+def bold(string):
+    return '\033[1m{}\033[0m'.format(string)
 
 
 def load_json(file_name):
@@ -205,14 +207,54 @@ def process_config(config):
     logger.info('Built output archive to: {}'.format(config['zipName']))
 
 
+def better_input(question, default_value = ''):
+    prepared_default = '({})'.format(bold(default_value)) if default_value != '' else ''
+    val = input('{}: {} '.format(question, prepared_default))
+    if val == '' and default_value != '':
+        return default_value
+    return val
+
+
 # programm
 if __name__ == '__main__':
 
     parser=argparse.ArgumentParser()
 
+    parser.add_argument('--init', action="store_true", help='Interactively create a packer config file')
     parser.add_argument('-V', '--verbose', action="store_true", help='Increase output verbosity')
 
     args = parser.parse_args()
+
+    if args.init is True:
+        available_environments = environmentConfigs.keys()
+
+        extensions = [x.split('.')[-1] for x in find_files(['*.*'], [])]
+        most_common_extension = max(set(extensions), key=extensions.count)
+        environment_prediction = ''
+        if most_common_extension == 'js':
+            environment_prediction = 'node'
+        elif most_common_extension == 'py':
+            environment_prediction = 'python'
+        print('This utility will create a packeger configuration file')
+        while True:
+            environment = better_input('environment [available options: node / python]', environment_prediction)
+            if environment in available_environments:
+                break
+            print('please select one of the available environments')
+        zip_name = better_input('zip name', DEFAULT_CONFIG['zipName'])
+
+        config = DEFAULT_CONFIG.copy()
+        config.update(DEFAULT_CONFIG)
+        config.update({
+            'environment': environment,
+            'zipName': zip_name
+        })
+
+        file_name = os.path.join(cwd, 'packer.config.json')
+        with open(file_name, 'w') as f:
+            f.write(json.dumps(config, indent = 2))
+            print('Saved config to {}'.format(file_name))
+        exit()
 
     verbose = args.verbose
 
