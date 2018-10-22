@@ -137,9 +137,11 @@ def enhance_config(config):
         enhanced_config.update(DEFAULT_CONFIG)
         enhanced_config.update(item)
 
+        ignore_masks = cast_list(enhanced_config['ignore']) + map(lambda x: x['fileName'], config_paths) + [enhanced_config['zipName']]
+
         enhanced_config.update({
             'files': cast_list(enhanced_config['files']),
-            'ignore': cast_list(enhanced_config['ignore']),
+            'ignore': ignore_masks,
             'dependencies': cast_list(enhanced_config['dependencies']),
             'tempDir': tempfile.mkdtemp() if 'tempDir' not in enhanced_config else enhanced_config['tempDir']
         })
@@ -154,7 +156,7 @@ def enhance_config(config):
 
 # install stuff
 
-environmentConfigs = {
+environment_configs = {
     'python': {
         'mostCommonExtensions': ['py'],
         'defaultDependencyFile': 'requirements.txt',
@@ -185,7 +187,7 @@ environmentConfigs = {
 
 def install_dependencies(config):
     environment = config['environment']
-    environment_config = environment if type(environment) is dict else environmentConfigs[environment]['installCommands']
+    environment_config = environment if type(environment) is dict else environment_configs[environment]['installCommands']
     commands = []
     if 'dependencyFile' in config:
         commands = cast_list(environment_config['installDependencyFile'])
@@ -240,12 +242,12 @@ if __name__ == '__main__':
     if args.init is True:
         print('This utility will create a packeger configuration file')
 
-        available_environments = environmentConfigs.keys()
+        available_environments = environment_configs.keys()
 
         extensions = [x.split('.')[-1] for x in find_files(['*.*'], [])]
         most_common_extension = max(set(extensions), key=extensions.count) if extensions else None
         environment_prediction = None
-        for environment_name, config in environmentConfigs.items():
+        for environment_name, config in environment_configs.items():
             if most_common_extension in config['mostCommonExtensions']:
                 environment_prediction = environment_name
                 break
@@ -258,7 +260,7 @@ if __name__ == '__main__':
                 break
             print('please select one of the available environments')
 
-        dependencies_file_name = environmentConfigs[environment]['defaultDependencyFile']
+        dependencies_file_name = environment_configs[environment]['defaultDependencyFile']
         dependencies_file_path = os.path.join(cwd, dependencies_file_name)
         use_default_dependencies_file = os.path.isfile(dependencies_file_path) and better_input(
                 'use {} as dependencies file ?'.format(bold(dependencies_file_name)),
@@ -272,7 +274,7 @@ if __name__ == '__main__':
         config.update({
             'environment': environment,
             'zipName': zip_name,
-            'ignore': environmentConfigs[environment]['defaultIgnore'],
+            'ignore': environment_configs[environment]['defaultIgnore'],
         })
 
         if use_default_dependencies_file is True:
