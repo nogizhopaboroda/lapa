@@ -1,0 +1,11 @@
+{
+  "files": [
+    "*"
+  ],
+  "environment": "node",
+  "zipName": "lambda.zip",
+  "ignore": [
+    "node_modules/*"
+  ],
+  "dependencies": ["smallest"]
+}
