@@ -178,7 +178,7 @@ python <(curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/pack
 
 - [simple python project](./example/python/simple/)
 - [simple node project](./example/node/simple/)
-- [node project with 2 configs (lambda + edge)](./example/node/simple/)
+- [node project with 2 configs (lambda + edge)](./example/node/lambda_plus_edge/)
 - [simple python project with requirements.txt](./example/python/with_requirements_txt/)
 
 ## Troubleshooting
