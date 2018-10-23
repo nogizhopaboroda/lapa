@@ -39,7 +39,7 @@ def exec_command(command, cwd = None, sync = True):
     stdout = ''
     while(True):
         retcode = p.poll()
-        line = p.stdout.readline()
+        line = p.stdout.readline().decode('utf-8')
         stdout += line
         logger.info(line)
         if(retcode is not None):
