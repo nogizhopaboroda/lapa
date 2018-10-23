@@ -184,7 +184,7 @@ environment_configs = {
 }
 
 def install_dependencies(config):
-    environment = config['environment']
+    environment = config.get('environment', {})
     environment_config = environment if type(environment) is dict else environment_configs[environment]['installCommands']
     commands = []
     if 'dependencyFile' in config:
