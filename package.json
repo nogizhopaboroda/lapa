@@ -1,0 +1,18 @@
+{
+  "name": "lapa",
+  "version": "1.0.0",
+  "description": "universal lambda packager",
+  "bin": {
+    "lapa": "packer.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nogizhopaboroda/lapa.git"
+  },
+  "author": "Alexander Zhukov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nogizhopaboroda/lapa/issues"
+  },
+  "homepage": "https://github.com/nogizhopaboroda/lapa#readme"
+}
