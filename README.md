@@ -4,12 +4,51 @@ It generates zip archive ready for uploading on AWS with no pain using just a si
 
 Supports `node` and `python` out of the box, can be customised for other environments.
 
+## Usage
 
-## Configuration
+### Installation
 
-### Config file
+##### manual
 
-A config file is either plain json file (`packer.config.json`) or js module (`packer.config.js`) that exports configuration object.
+```sh
+curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/packer.py -o /usr/local/bin/lapa && chmod +x /usr/local/bin/lapa
+```
+
+##### with npm
+
+```sh
+npm i -g https://github.com/nogizhopaboroda/lapa
+```
+
+##### as a local npm dependency
+```sh
+npm i --save-dev https://github.com/nogizhopaboroda/lapa
+```
+
+then in package.json:
+
+```js
+{
+  ...
+  "scripts": {
+    "pack": "lapa"
+  }
+  ...
+}
+```
+
+##### Usage directly from github
+
+```sh
+python <(curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/packer.py) [arguments]
+```
+
+
+### Configuration
+
+#### Config file
+
+A config file is either plain json file (`packer.config.json`) or js module (`packer.config.js`) that exports configuration object *placed within project directory*.
 
 
 example `packer.config.json`:
@@ -49,7 +88,7 @@ module.exports = [
 ]
 ```
 
-### Configuration object
+#### Configuration object
 
 ```js
 { //can be an array (for multiple builds)
@@ -65,7 +104,7 @@ module.exports = [
 }
 ```
 
-#### Required fields
+##### Required fields
 
 `environment`:
 
@@ -89,7 +128,7 @@ where
 
 `{dependencyFile}` - dependency file from config object
 
-#### Optional fields
+##### Optional fields
 
 `files` (Default: `[*]`):
 
@@ -125,7 +164,7 @@ Change file directory in resulting archive. Example:
 }
 ```
 
-### Generate a basic configuration file
+#### Generate a basic configuration file
 
 You can create config file in interactive mode
 
@@ -136,42 +175,14 @@ lapa --init
 App will ask you several questions and try to guess you environment based on most common files type
 
 
-## Installation
+#### Run
 
-#### manual
-
-```sh
-curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/packer.py -o /usr/local/bin/lapa && chmod +x /usr/local/bin/lapa
-```
-
-#### with npm
+*within project directory* simply run:
 
 ```sh
-npm i -g https://github.com/nogizhopaboroda/lapa
+lapa
 ```
 
-#### as a local node dependency
-```sh
-npm i --save-dev https://github.com/nogizhopaboroda/lapa
-```
-
-then in package.json:
-
-```js
-{
-  ...
-  "scripts": {
-    "pack": "lapa"
-  }
-  ...
-}
-```
-
-#### Usage directly from github
-
-```sh
-python <(curl https://raw.githubusercontent.com/nogizhopaboroda/lapa/master/packer.py) [arguments]
-```
 
 
 ## Examples
