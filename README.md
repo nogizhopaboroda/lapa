@@ -197,3 +197,8 @@ lapa
 ##### Pip can't install dependencies in specific directory
 
 It's known issue if your `pip` is installed via brew. As a workaround just copy [this setup.cfg file](./example/python/simple/setup.cfg) in your project on root level as [in this example](./example/python/simple/)
+
+
+## Requirements
+
+`python >= 2`
